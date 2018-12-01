@@ -1,0 +1,98 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Microsoft.Speech.Recognition;
+using System.Speech.Synthesis;
+using System.Globalization;
+namespace my_app
+{
+    public partial class Rosto_do_robo : Form
+    {
+        static CultureInfo ci = new CultureInfo("pt-BR");
+        static SpeechRecognitionEngine Reconhecedor;
+        SpeechSynthesizer Resposta = new SpeechSynthesizer();
+
+        public String[] listaPalavras = { "ola senhor ", "faça um reletório para mim" +
+                "Procure para mim no  google", " qum é esta pessoa?"," Busque uma musica para mim"
+             "o que minha ame é para mim?"," o que  meu padrastro é para mim?", "Busuqe este nome no banco de dados"
+              };
+
+
+
+        public Rosto_do_robo()
+        {
+            InitializeComponent();
+            init();
+        }
+
+
+
+
+
+        public void Gramatica()
+        {
+            try
+            {
+                Reconhecedor = new SpeechRecognitionEngine(ci);
+
+            }
+            catch(Exception ex)
+
+            {
+                MessageBox.Show(" ERRO ao integrar lingua escolhida" + ex.Message);
+            }
+            var gramatica = new Choices();
+            gramatica.Add(listaPalavras);
+
+            var gb = new GrammarBuilder();
+            gb.Append(gramatica);
+            try
+            {
+                var g = new Grammar(gb);
+
+
+                try
+                {
+                    Reconhecedor.RequestRecognizerUpdate();
+                    Reconhecedor.LoadGrammarAsync(g);
+                    Reconhecedor.SpeechRecognized += Sre_Reconhecimento;
+                    Reconhecedor.SetInputToDefaultAudioDevice();
+                    Resposta.SetOutputToDefaultAudioDevice();
+                    Reconhecedor.RecognizeAsync(RecognizeMode.Multiple);
+
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("ERRO AO CRIAR RECONHECEDOR :" + ex.Message);
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("ERRO ao criar a gramatica" + ex.Message);
+            }
+        }
+
+        public void init()
+        {
+            Resposta.Volume = 100;
+            Resposta.Rate = 4;
+            Gramatica();
+        }
+
+        void Sre_Reconhecimento(object sender , SpeechRecognizedEventArgs e)
+        {
+            String frase = e.Result.Text;
+
+            if(frase.Equals("ola"))
+           {
+                Resposta.SpeakAsync("ola senhor o que deseja trabalhar hoje?");
+           }
+        }
+       
+    }
